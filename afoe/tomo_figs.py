@@ -202,3 +202,37 @@ a1.legend(fontsize=9, frameon=False, loc="lower center"); a1.grid(alpha=0.25)
 fig.tight_layout()
 fig.savefig(f"{OUT}/tomo_potentials.png", dpi=170, bbox_inches="tight")
 print("written")
+
+# ---------------- figure 4: marginals (data vs re-projections) and potentials
+phi_f, phi_u = to_phi(res[False][3]), to_phi(res[True][3])
+dirs = [0, K // 3, 2 * K // 3]
+fig, axes = plt.subplots(2, 3, figsize=(12, 5.6), sharex=True)
+for j, k in enumerate(dirs):
+    sel = q_emp[k] > 1e-4
+    t = tgrid[sel]
+    a = axes[0, j]
+    a.fill_between(t, q_emp[k][sel], color=SLATE, alpha=0.22, label="measured marginal (data)")
+    a.plot(t, q_emp[k][sel], color=SLATE, lw=1.8)
+    # same 2-bin smoothing as the data histograms (removes grid aliasing)
+    mu_ = gaussian_filter1d(marg(Q_smu, k), 2.0)[sel]
+    mf_ = gaussian_filter1d(marg(Q_sm, k), 2.0)[sel]
+    a.plot(t, mu_ / mu_.max() * q_emp[k][sel].max(), color=WINE, lw=1.6,
+           label="re-projection, unfiltered (rescaled)")
+    a.plot(t, mf_, color=TEAL, lw=2.2, ls="--", label="re-projection, filtered")
+    a.set_title(f"direction {np.degrees(thetas[k]):.0f}$^\\circ$", fontsize=11)
+    a.set_yticks([]); a.grid(alpha=0.2)
+    if j == 0:
+        a.legend(fontsize=8, frameon=False, loc="upper left")
+    a = axes[1, j]
+    fu = phi_u[k][sel] - phi_u[k][sel].max()
+    ff = phi_f[k][sel] - phi_f[k][sel].max()
+    a.plot(t, fu, color=WINE, lw=2.2, label=r"unfiltered $\varphi_k$ ($\approx\log\rho_k$)")
+    a.plot(t, ff, color=TEAL, lw=2.6, label=r"filtered $\varphi_k$ (joint solve)")
+    a.set_xlabel(r"$t=\langle\theta_k,x\rangle$"); a.grid(alpha=0.2)
+    if j == 0:
+        a.set_ylabel(r"potential $\varphi_k(t)$")
+        a.legend(fontsize=8, frameon=False, loc="lower center")
+axes[0, 0].set_ylabel("marginal")
+fig.tight_layout()
+fig.savefig(f"{OUT}/tomo_marg_pot.png", dpi=170, bbox_inches="tight")
+print("written fig4")

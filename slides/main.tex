@@ -178,6 +178,17 @@ alone, $\approx$ log-histograms): information counted $\approx\kappa$ times, the
 \end{keybox}
 \end{frame}
 
+\begin{frame}{Testbed: marginals and potentials}
+\centering
+\includegraphics[width=0.86\linewidth]{figs/tomo_marg_pot.png}
+
+\footnotesize\raggedright
+\textbf{Top} (tomographic check): projecting each fitted model back onto a direction. The \textcolor{teal}{filtered}
+model reproduces the measured marginal; the \textcolor{wine}{unfiltered} one collapses to a spike.\\
+\textbf{Bottom}: unfiltered potentials are the log-histograms. Filtered potentials are \emph{shares}: smoother,
+and they trade tilts and curvature with the other directions, so only their sum is meaningful.
+\end{frame}
+
 \begin{frame}{Score matching \emph{is} filtered back-projection, in closed form \hfill\tagnew}
 \begin{columns}[T]
 \column{0.5\textwidth}
