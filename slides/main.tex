@@ -159,22 +159,22 @@ density estimation (Friedman et al.\ 1984).
 \end{columns}
 \end{frame}
 
-\begin{frame}{Unfiltered back-projection over-counts; filtering fixes it (2-D testbed)}
+\begin{frame}{Unfiltered back-projection over-counts; one linear solve fixes it (2-D testbed)}
 \centering
 \includegraphics[width=0.96\linewidth]{figs/tomo_recon.png}\\[-1mm]
 \footnotesize
 \begin{tabular}{@{}*{4}{>{\centering\arraybackslash}p{0.235\linewidth}}@{}}
-target density & \textcolor{wine}{\textbf{unfiltered}}: $\varphi_k=\log\rho_k$ &
-\textcolor{teal}{\textbf{filtered}}: $\varphi_k=\log\rho_k/\kappa$ & exact max-entropy (IPF)\\
- & KL $=34.9$ & KL $=0.43$ & KL $=0.25$\\
+target density & \textcolor{wine}{\textbf{unfiltered}}: each direction alone & \textcolor{teal}{\textbf{filtered}}: one linear solve $Ac=d$ & iterative max-entropy (IPF, 2 sweeps)\\
+ & KL $=39.5$ & KL $=\mathbf{0.03}$ & KL $=0.25$\\
 \end{tabular}
 
 \medskip
 \begin{keybox}
-\small 64 directions in $\R^2$, each sharing information with its neighbours: redundancy $\kappa=K/N=32$.
-Back-projecting the raw log-histograms counts every piece of information $\approx\kappa$ times and the
-model collapses. Dividing by the redundancy --- the simplest ``ramp filter'' --- recovers the modes and
-closes 99\% of the gap to the exact (iterative) max-entropy solution.
+\small 64 directions in $\R^2$, so every direction overlaps its neighbours (redundancy $\kappa=K/N=32$).
+Model: $\log q(x)=\sum_k\varphi_k(\inner{\theta_k}{x})$, fitted by score matching --- the same normal
+equations as for images. \textbf{Unfiltered} = keep only the diagonal blocks of $A$ (each direction fitted
+alone, $\approx$ log-histograms): information counted $\approx\kappa$ times, the model collapses.
+\textbf{Filtered} = the full solve: the overlap is undone and the density is recovered.
 \end{keybox}
 \end{frame}
 

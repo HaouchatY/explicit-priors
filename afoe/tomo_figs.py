@@ -89,6 +89,76 @@ Q_ipf = joint(phi)
 kl = dict(naive=KL(P, Q_naive), rho=KL(P, Q_rho), ipf=KL(P, Q_ipf))
 print("KL", kl, "rho", rho[0])
 
+# ---------------- what we actually do: score matching = one linear solve
+# log q(x) = sum_k phi_k(<theta_k, x>),  psi_k = phi_k' = sum_a c_ka b_a (hat functions).
+# Hyvarinen score matching: J(c) = E[ 1/2 |grad log q|^2 + Laplacian log q ] = 1/2 c'Ac + e'c
+#   A_(ka),(lb) = cos(theta_k - theta_l) E[b_a(t_k) b_b(t_l)]   (overlap of the directions)
+#   e_(ka)      = E[b_a'(t_k)]                                   (only the marginal of t_k)
+# filtered = full solve c = -A^{-1} e; unfiltered = keep only the diagonal blocks (k = l).
+import scipy.sparse as sp
+MB = 48
+knots = np.linspace(-7.5, 7.5, MB)
+dk = knots[1] - knots[0]
+
+
+def hat_features(T):
+    """sparse (n, K*MB) hat values and derivatives for projections T (n, K)."""
+    n = T.shape[0]
+    u = np.clip((T - knots[0]) / dk, 0, MB - 1 - 1e-9)
+    i0 = np.floor(u).astype(int)
+    fr = u - i0
+    inside = (T > knots[0]) & (T < knots[-1])
+    rows = np.repeat(np.arange(n), K)
+    cols0 = (np.arange(K)[None, :] * MB + i0).ravel()
+    H = sp.csr_matrix((np.r_[(1 - fr).ravel(), fr.ravel()],
+                       (np.r_[rows, rows], np.r_[cols0, cols0 + 1])), shape=(n, K * MB))
+    dv = (inside / dk).ravel()
+    Dv = sp.csr_matrix((np.r_[-dv, dv], (np.r_[rows, rows], np.r_[cols0, cols0 + 1])),
+                       shape=(n, K * MB))
+    return H, np.asarray(Dv.mean(0)).ravel()
+
+
+Th = np.stack([np.cos(thetas), np.sin(thetas)])                  # (2, K)
+perm = rng.permutation(NS)
+Tf, Tv = S[perm[:160_000]] @ Th, S[perm[160_000:220_000]] @ Th
+Hf, ef = hat_features(Tf)
+Hv, ev = hat_features(Tv)
+Cdir = np.kron(np.cos(thetas[:, None] - thetas[None, :]), np.ones((MB, MB)))
+Af = (Hf.T @ Hf).toarray() / Tf.shape[0] * Cdir
+Av = (Hv.T @ Hv).toarray() / Tv.shape[0] * Cdir
+Dm = np.diff(np.eye(MB), 2, axis=0)
+Om = np.kron(np.eye(K), Dm.T @ Dm)
+blk = np.kron(np.eye(K), np.ones((MB, MB))).astype(bool)
+
+
+def sm_solve(A, e, ridge, mu, diag_only=False):
+    A2 = np.where(blk, A, 0.0) if diag_only else A
+    M = A2 + ridge * np.trace(A2) / len(e) * np.eye(len(e)) + mu * np.trace(A2) / np.trace(Om) * Om
+    return np.linalg.solve(M, -e)
+
+
+def to_phi(c):
+    psi = np.stack([np.interp(tgrid, knots, c[k * MB:(k + 1) * MB], left=0, right=0) for k in range(K)])
+    ph = np.concatenate([np.zeros((K, 1)), np.cumsum(0.5 * (psi[:, 1:] + psi[:, :-1]) * dt, 1)], 1)
+    return ph
+
+
+res = {}
+for diag in (False, True):
+    best = None
+    for ridge in (1e-8, 1e-6, 1e-4, 1e-2):
+        for mu in (0.0, 1e-3, 1e-2, 1e-1, 1.0):
+            c = sm_solve(Af, ef, ridge, mu, diag)
+            jv = 0.5 * c @ ((np.where(blk, Av, 0) if diag else Av) @ c) + ev @ c
+            if best is None or jv < best[0]:
+                best = (jv, ridge, mu, c)
+    res[diag] = best
+    print("SM", "unfiltered" if diag else "filtered", "J_val %.4f ridge %g mu %g" % best[:3])
+Q_sm = joint(to_phi(res[False][3]))
+Q_smu = joint(to_phi(res[True][3]))
+kl.update(sm=KL(P, Q_sm), sm_unf=KL(P, Q_smu))
+print("KL with score matching:", kl)
+
 # ---------------- figure 1: projections of a density (the "sinogram" picture)
 fig, ax = plt.subplots(figsize=(5.6, 5.6))
 ax.imshow(P ** 0.6, origin="lower", extent=[-L, L, -L, L], cmap="Greys", vmax=(P ** 0.6).max() * 0.8)
@@ -114,10 +184,7 @@ fig.savefig(f"{OUT}/tomo_projections.png", dpi=170, bbox_inches="tight")
 
 # ---------------- figure 2: reconstructions
 fig, axes = plt.subplots(1, 4, figsize=(13, 3.3))
-for a, (Q, ttl) in zip(axes, [(P, "target density\n"),
-                              (Q_naive, f"unfiltered back-projection\nKL = {kl['naive']:.1f}"),
-                              (Q_rho, f"filtered (divide by redundancy)\nKL = {kl['rho']:.2f}"),
-                              (Q_ipf, f"exact max-entropy (IPF)\nKL = {kl['ipf']:.2f}")]):
+for a, (Q, ttl) in zip(axes, [(P, ""), (Q_smu, ""), (Q_sm, ""), (Q_ipf, "")]):
     a.imshow(Q ** 0.6, origin="lower", extent=[-L, L, -L, L], cmap="magma")
     a.set_xticks([]); a.set_yticks([])                # captions are set in LaTeX
 fig.tight_layout(w_pad=0.6)
