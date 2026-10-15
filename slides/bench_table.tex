@@ -1,0 +1,44 @@
+\begin{columns}[T]
+\column{0.38\textwidth}
+\textbf{Getting the potentials} (from scratch, incl.\ data loading and selection)
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\EXP{LS fit 1} (DSM step) & 59.5\,s\\
+\EXP{LS fit 2} (refinement step) & 47.3\,s\\
+\EXP{LS fit 3} (prox matching) & 60.0\,s\\\midrule
+\textbf{ours, total} & \textbf{2.8\,min}\\
+WCRR \TRN{training} & \textbf{3.03\,h}\\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\scriptsize WCRR: the repository's own training, measured earlier on a V100: 1.82\,s/batch
+$\times$ 6000 batches. Ratio $\approx65\times$.
+\column{0.60\textwidth}
+\textbf{Denoising one image} (median of 3 runs, after warm-up)
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & $481\times321$ & $512\times512$\\\midrule
+ours: two closed-form steps & \textbf{0.015\,s} & \textbf{0.022\,s}\\
+ours: MAP, 1-D + SF, 500 it & 11.7\,s & 17.9\,s\\
+ours: MAP, 1-D + SF, 250 it\textsuperscript{*} & 6.0\,s & 9.1\,s\\
+ours: MAP, 1-D only, 500 it & 5.5\,s & 7.8\,s\\
+unfiltered MAP, 4000 it & 41.7\,s & 59.5\,s\\
+WCRR, its own solver & 1.5\,s & 2.2\,s\\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\scriptsize \textsuperscript{*}already converged (same PSNR to 4 decimals as 500--2000 iterations).
+\end{columns}
+
+\medskip
+\begin{keybox}
+\small Fitting is $\approx65\times$ cheaper than training. The explicit two-step denoiser is
+$100\times$ faster than WCRR. Our MAP solver is $4$--$8\times$ \emph{slower} than WCRR's (generic
+FISTA with line search on tabulated potentials): inference speed is the open engineering item.
+\end{keybox}
