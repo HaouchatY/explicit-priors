@@ -115,6 +115,29 @@ def cmd_potentials(specs, sigma, name, n_show=8):
     print("wrote", FIG / f"{name}_s{sigma}.png")
 
 
+def cmd_filters(banks, name="filters", n_show=48):
+    """Filter galleries side by side: one panel per bank, n_show filters each
+    (PCA: by decreasing variance; others: evenly spaced through the bank)."""
+    fig, axes = plt.subplots(1, len(banks), figsize=(3.3 * len(banks), 3.6))
+    for ax, b in zip(np.atleast_1d(axes), banks):
+        h = afoe.get_bank(b)
+        idx = np.arange(min(n_show, len(h))) if b.startswith("PCA") else \
+            np.linspace(0, len(h) - 1, min(n_show, len(h))).round().astype(int)
+        P = h.shape[1]
+        g = int(np.ceil(np.sqrt(len(idx))))
+        M = np.full((g * (P + 1) + 1, g * (P + 1) + 1), np.nan)
+        for j, k in enumerate(idx):
+            r, c = divmod(j, g)
+            f = h[k] / np.abs(h[k]).max()
+            M[1 + r * (P + 1):1 + r * (P + 1) + P, 1 + c * (P + 1):1 + c * (P + 1) + P] = f
+        ax.imshow(M, cmap="RdBu_r", vmin=-1, vmax=1, interpolation="nearest")
+        ax.set_title(f"{b} ({len(h)} filters)", fontsize=11)
+        ax.axis("off")
+    fig.tight_layout()
+    fig.savefig(FIG / f"{name}.png", dpi=170, bbox_inches="tight")
+    print("wrote", FIG / f"{name}.png")
+
+
 def per_image(kind, nm, variant, st, sigma):
     if kind in ("wcrr", "bm3d"):
         R = json.load(open(OLD / "results" / f"eval_{kind.upper()}_s{sigma}.json"))
@@ -181,7 +204,8 @@ def cmd_crops(rows, sigma, st, img, box=None):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("cmd", choices=["potentials", "table", "crops"])
+    p.add_argument("cmd", choices=["potentials", "table", "crops", "filters"])
+    p.add_argument("--banks", default="WCRR60,DCT8,PCA7,PCA13")
     p.add_argument("--specs", default="")
     p.add_argument("--rows", default="")
     p.add_argument("--name", default="potentials")
@@ -190,6 +214,9 @@ def main():
     p.add_argument("--img", default="08.png")
     p.add_argument("--box", default="", help="r0,c0,size of the zoom")
     a = p.parse_args()
+    if a.cmd == "filters":
+        cmd_filters(a.banks.split(","))
+        return
     if a.cmd == "potentials":
         cmd_potentials(a.specs.split(";"), a.sigma, a.name)
     elif a.cmd == "table":

@@ -111,15 +111,71 @@ def to_t(a, dtype=torch.float32):
 # filter banks
 # ===========================================================================
 BANK_PARTS = {"V4": ["dct8", "steer8x3lo", "steer8x5", "steer12x5"],
-              "WCRR60": ["WCRR60"], "ICA": ["ica13"], "DCT107": ["DCT107"]}
+              "WCRR60": ["WCRR60"], "ICA": ["ica13"], "DCT107": ["DCT107"], "DCT8": ["dct8"]}
+
+
+def pca_bank(P, stride=2):
+    """Data-analytic filters: the Karhunen-Loeve (PCA) basis of P x P patches of
+    the FIT images, DC removed, i.e. the eigenvectors of the patch covariance
+    (P^2 - 1 filters, by decreasing variance). For the Gaussian part of the prior
+    they are optimal: the best quadratic score-matching prior is the inverse
+    patch covariance, whose eigenvectors these are. One eigendecomposition."""
+    fp = OUT / "banks" / f"PCA{P}.npz"
+    if fp.exists():
+        return np.load(fp)["h"]
+    C = np.zeros((P * P, P * P))
+    n = 0
+    for f in FIT:
+        x = load_gray(f)
+        pt = np.lib.stride_tricks.sliding_window_view(x, (P, P))[::stride, ::stride].reshape(-1, P * P)
+        pt = pt - pt.mean(1, keepdims=True)
+        C += pt.T @ pt
+        n += len(pt)
+    lam, V = np.linalg.eigh(C / n)
+    order = np.argsort(lam)[::-1][:P * P - 1]          # the last one is the DC null direction
+    h = V[:, order].T.reshape(-1, P, P)
+    fp.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(fp, h=h, lam=lam[order])
+    return h
+
+
+def fobi_bank(P, stride=2):
+    """Closed-form ICA (FOBI, Cardoso 1989): whiten the DC-free P x P patches of
+    the FIT images with their PCA, then diagonalise the fourth-order matrix
+    E[|z|^2 z z^T] of the whitened patches. The unmixing rows, mapped back to
+    pixel space, are the filters: the directions of most distinct kurtosis,
+    i.e. sparse/non-Gaussian filters from two eigendecompositions."""
+    fp = OUT / "banks" / f"FOBI{P}.npz"
+    if fp.exists():
+        return np.load(fp)["h"]
+    pts = []
+    for f in FIT:
+        x = load_gray(f)
+        pt = np.lib.stride_tricks.sliding_window_view(x, (P, P))[::stride, ::stride].reshape(-1, P * P)
+        pts.append(pt - pt.mean(1, keepdims=True))
+    X = np.concatenate(pts)
+    lam, V = np.linalg.eigh(X.T @ X / len(X))
+    keep = np.argsort(lam)[::-1][:P * P - 1]
+    Wh = V[:, keep] / np.sqrt(lam[keep])                 # whitening: z = X Wh
+    Z = X @ Wh
+    M4 = (Z * (Z * Z).sum(1, keepdims=True)).T @ Z / len(Z)
+    mu, U = np.linalg.eigh(M4)
+    h = (Wh @ U).T.reshape(-1, P, P)                      # filters s = <h, x>
+    h /= np.sqrt((h ** 2).sum(axis=(1, 2), keepdims=True))
+    fp.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(fp, h=h, kurt=mu)
+    return h
 
 
 def get_bank(name):
     """'A+B+...' -> (K, P, P) zero-mean unit-norm filters, centred-padded to a
     common size. V4: DCT-8 + steerable pyramids (training-free); WCRR60: the
-    60 filters of the trained WCRR (for like-for-like potential comparisons)."""
+    60 filters of the trained WCRR (for like-for-like potential comparisons);
+    PCA<P>: the patch PCA basis of the training images (data-analytic)."""
     d = np.load(BANKS)
-    hs = [d[p] for nm in name.split("+") for p in BANK_PARTS.get(nm, [nm])]
+    hs = [pca_bank(int(nm[3:])) if nm.startswith("PCA") else
+          fobi_bank(int(nm[4:])) if nm.startswith("FOBI") else d[p]
+          for nm in name.split("+") for p in BANK_PARTS.get(nm, [nm])]
     P = max(h.shape[1] for h in hs)
     h = np.concatenate([np.pad(a, ((0, 0), ((P - a.shape[1]) // 2,) * 2,
                                    ((P - a.shape[1]) // 2,) * 2)) for a in hs]).astype(np.float64)

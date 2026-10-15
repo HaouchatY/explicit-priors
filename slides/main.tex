@@ -648,6 +648,32 @@ fitted $R$. V4 = DCT-8 + steerable pyramids: a filter bank that involves no lear
 \end{keybox}
 \end{frame}
 
+\begin{frame}{Which filters? Learned, analytic, and data-analytic}
+\centering
+\includegraphics[width=\linewidth]{figs/filters.png}
+
+\vspace{1mm}
+\resizebox{0.92\linewidth}{!}{%
+\begin{tabular}{@{}llrccc@{}}
+\toprule
+filters & obtained by & $K$ & held-out (VAL) & Set12 & BSD68\\\midrule
+WCRR60 + V4 ($r=5$) & learned + analytic & 371 & 28.05 & 29.92 & 28.82\\
+WCRR60 & \TRN{learned} (bilevel training) & 60 & 27.93 & 29.77 & 28.70\\
+V4 & \EXP{analytic}: DCT-8 + steerable pyramids & 311 & 27.84 & 29.66 & 28.63\\
+ICA $13{\times}13$ & data: FastICA (iterative) & 168 & 27.81 & 29.53 & 28.57\\
+PCA $5{\times}5$ & data: patch PCA, \EXP{closed form} & 24 & 27.60 & 29.25 & 28.41\\
+DCT $8{\times}8$ & \EXP{analytic} & 63 & 27.59 & 29.32 & 28.40\\
+PCA $13{\times}13$ & data: patch PCA, \EXP{closed form} & 168 & 27.44 & 29.12 & 28.27\\
+FOBI $5{\times}5$ & data: closed-form ICA & 24 & 27.39 & 28.90 & 28.14\\
+\bottomrule
+\end{tabular}}
+
+\vspace{1mm}
+\scriptsize Two explicit steps, $r=3$, no tuning. \textbf{The held-out objective ranks the banks exactly like the BSD68
+test PSNR}: it is the explicit criterion for choosing filters. PCA is optimal only for the Gaussian part; the experts
+need localized, oriented filters.
+\end{frame}
+
 \begin{frame}{What it looks like (Set12: Monarch, Barbara, Cameraman; zooms)}
 \centering
 \includegraphics[height=0.78\textheight]{figs/slide_crops.png}
