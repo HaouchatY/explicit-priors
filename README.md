@@ -26,4 +26,7 @@ pytest src/explicit_priors_tests
 
 # build HTML docs
 python -m sphinx -b html doc doc/_build/html
+
+# publish them on GitHub Pages
+dev/publish_docs.sh
 ```
