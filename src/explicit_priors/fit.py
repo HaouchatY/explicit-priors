@@ -322,14 +322,21 @@ def _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg):
     r"""One damped Gauss--Newton step on :math:`E\|\hat x_{MAP}(y) - x\|^2`: the features at the current
     MAP estimates, the target (y - x) / sigma^2. The step length is chosen on the held-out images."""
 
+    H, W = train[0].shape[-2:]
+    mb = min(64, max(1, int(4e8 // (prior.filters.shape[0] * (H + 32) * (W + 32)))))  # images per MAP solve
+
     def at_map(imgs, seed_):
-        return [(x, y, map_estimate(prior, y)) for x, y in _noisy(imgs, sigma, batch, device, seed_)]
+        out = []
+        for x, y in _noisy(imgs, sigma, mb, device, seed_):
+            m = map_estimate(prior, y)
+            out += [(x[i : i + batch], y[i : i + batch], m[i : i + batch]) for i in range(0, len(x), batch)]
+        return out
 
     tr = at_map(train, seed)
     A, d = normal_equations(prior, ((m, (y - x) / sigma**2) for x, y, m in tr))
     c_gn = solve(A, d, reg[0], reg[1], R, T)
     c0 = prior.coef.reshape(-1).double().clone()
-    va = list(_noisy(held if len(held) else train, sigma, batch, device, seed + 1))
+    va = list(_noisy(held if len(held) else train, sigma, mb, device, seed + 1))
 
     def loss(c):
         prior.coef.copy_(c.view_as(prior.coef))
