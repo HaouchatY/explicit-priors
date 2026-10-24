@@ -16,15 +16,33 @@ import torch.nn.functional as F
 
 from . import basis as ep_basis
 
+FFT_SIZE = 9  # filters at least this wide are applied through FFTs
 
-def correlate(x, filters):
+
+def spectra(filters, shape):
+    """(K, H, W // 2 + 1) Fourier transforms of the filters, zero-padded to shape."""
+    return torch.fft.rfft2(filters, s=shape)
+
+
+def correlate(x, filters, spec=None):
     """(B, H, W) images -> (B, K, H-s+1, W-s+1) responses."""
-    return F.conv2d(x[:, None], filters[:, None])
+    s = filters.shape[-1]
+    if s < FFT_SIZE:
+        return F.conv2d(x[:, None], filters[:, None])
+    H, W = x.shape[-2:]
+    spec = spectra(filters, (H, W)) if spec is None else spec
+    z = torch.fft.irfft2(torch.fft.rfft2(x)[:, None] * spec.conj(), s=(H, W))  # circular, exact on the valid part
+    return z[..., : H - s + 1, : W - s + 1]
 
 
-def correlate_adjoint(v, filters):
+def correlate_adjoint(v, filters, spec=None):
     """(B, K, h, w) fields -> (B, H, W): the adjoint of :py:func:`correlate`, summed over filters."""
-    return F.conv_transpose2d(v, filters[:, None])[:, 0]
+    s = filters.shape[-1]
+    if s < FFT_SIZE:
+        return F.conv_transpose2d(v, filters[:, None])[:, 0]
+    H, W = v.shape[-2] + s - 1, v.shape[-1] + s - 1
+    spec = spectra(filters, (H, W)) if spec is None else spec
+    return torch.fft.irfft2((torch.fft.rfft2(v, s=(H, W)) * spec).sum(1), s=(H, W))
 
 
 def batched(x):
@@ -68,6 +86,16 @@ class FoE(torch.nn.Module):
             "coef", torch.zeros(n_pot, self.basis.size) if coef is None else torch.as_tensor(coef).float()
         )
         self.sigma, self.objective = None, None  # set by fit()
+        self._spec = {}
+
+    def spectra(self, shape):
+        """Filter spectra for images of this shape (cached), or None for small filters."""
+        if self.size < FFT_SIZE:
+            return None
+        key = (tuple(shape), self.filters.device, self.filters._version)
+        if key not in self._spec:
+            self._spec = {key: spectra(self.filters, tuple(shape))}
+        return self._spec[key]
 
     @property
     def size(self) -> int:
@@ -76,7 +104,12 @@ class FoE(torch.nn.Module):
 
     def responses(self, x):
         """(B, H, W) -> (B, K, H-s+1, W-s+1)."""
-        return correlate(x, self.filters)
+        return correlate(x, self.filters, self.spectra(x.shape[-2:]))
+
+    def adjoint(self, v):
+        """(B, K, h, w) -> (B, H, W), summed over filters."""
+        s = self.size
+        return correlate_adjoint(v, self.filters, self.spectra((v.shape[-2] + s - 1, v.shape[-1] + s - 1)))
 
     def _per_filter(self):
         K = self.filters.shape[0]
@@ -102,14 +135,14 @@ class FoE(torch.nn.Module):
     def grad(self, x):
         r""":math:`\nabla \Phi(x)`, same shape as x."""
         xb, out = batched(x)
-        return out(correlate_adjoint(self.psi(self.responses(xb)), self.filters))
+        return out(self.adjoint(self.psi(self.responses(xb))))
 
     def energy_grad(self, x):
         r""":math:`(\Phi(x), \nabla \Phi(x))` with one correlation."""
         xb, out = batched(x)
         z = self.responses(xb)
         e = self.phi(z).sum((1, 2, 3), dtype=torch.float64)
-        return out(e), out(correlate_adjoint(self.psi(z), self.filters))
+        return out(e), out(self.adjoint(self.psi(z)))
 
     def potentials(self, n: int = 401, extent: float = 1.0):
         r"""

@@ -2,6 +2,7 @@ import torch
 
 import explicit_priors as ep
 from explicit_priors.fit import divergence, features
+from explicit_priors.foe import correlate, correlate_adjoint
 
 
 def _prior(device, groups=None, K=4):
@@ -59,3 +60,19 @@ def test_save_load(tmp_path, device):
     m2 = ep.FoE.load(tmp_path / "prior.pt", map_location=device)
     x = torch.rand(1, 16, 16, device=device)
     assert torch.allclose(m.energy(x), m2.energy(x)) and m2.sigma == 0.1
+
+
+def test_fft_path_matches_convolution(device):
+    g = torch.Generator().manual_seed(2)
+    f = torch.randn(5, 11, 11, generator=g).to(device)
+    x = torch.rand(2, 40, 36, generator=g).to(device)
+    z = torch.nn.functional.conv2d(x[:, None], f[:, None])
+    assert torch.allclose(correlate(x, f), z, atol=1e-4)
+    v = torch.randn(z.shape, generator=g).to(device)
+    ref = torch.nn.functional.conv_transpose2d(v, f[:, None])[:, 0]
+    assert torch.allclose(correlate_adjoint(v, f), ref, atol=1e-4)
+    m = ep.FoE(f, groups=torch.tensor([0, 0, 1, 1, 2]))
+    m.coef.normal_(generator=g)
+    m = m.to(device)
+    G = features(m, x)
+    assert torch.allclose(torch.einsum("bdhw,d->bhw", G, m.coef.reshape(-1)), m.grad(x), atol=1e-3)

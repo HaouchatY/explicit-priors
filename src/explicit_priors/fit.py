@@ -50,13 +50,26 @@ def features(prior, x):
     s, _ = prior._per_filter()
     z = prior.responses(x)
     B, _, h, w = z.shape
-    G = z.new_zeros(B, n_pot, n, *x.shape[-2:])
+    H, W = x.shape[-2:]
+    spec = prior.spectra((H, W))
+    if spec is None:  # small filters: transposed convolutions
+        G = z.new_zeros(B, n_pot, n, H, W)
+    else:  # large filters: sum the groups in the Fourier domain, one inverse FFT per basis potential
+        G = torch.zeros(B, n_pot, n, H, W // 2 + 1, device=z.device, dtype=spec.dtype)
     for k0, k1 in _chunks(prior, x):
-        b = prior.basis.features(z[:, k0:k1] / s[:, k0:k1])  # (B, k, h, w, n)
-        b = b.permute(0, 1, 4, 2, 3).reshape(B, (k1 - k0) * n, h, w)
-        Gk = F.conv_transpose2d(b, prior.filters[k0:k1].repeat_interleave(n, 0)[:, None], groups=(k1 - k0) * n)
-        G.index_add_(1, prior.groups[k0:k1], Gk.view(B, k1 - k0, n, *x.shape[-2:]))
-    return G.reshape(B, n_pot * n, *x.shape[-2:])
+        b = prior.basis.features(z[:, k0:k1] / s[:, k0:k1]).permute(0, 1, 4, 2, 3)  # (B, k, n, h, w)
+        if spec is None:
+            Gk = F.conv_transpose2d(
+                b.reshape(B, (k1 - k0) * n, h, w),
+                prior.filters[k0:k1].repeat_interleave(n, 0)[:, None],
+                groups=(k1 - k0) * n,
+            ).view(B, k1 - k0, n, H, W)
+        else:
+            Gk = torch.fft.rfft2(b, s=(H, W)) * spec[k0:k1, None]
+        G.index_add_(1, prior.groups[k0:k1], Gk)
+    if spec is not None:
+        G = torch.fft.irfft2(G, s=(H, W))
+    return G.reshape(B, n_pot * n, H, W)
 
 
 def divergence(prior, x):
