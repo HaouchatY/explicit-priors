@@ -21,3 +21,4 @@ from .fit import (
     normal_equations as normal_equations,
 )
 from .foe import FoE as FoE
+from .learn import learn_filters as learn_filters
