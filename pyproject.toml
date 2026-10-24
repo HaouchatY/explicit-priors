@@ -1,0 +1,63 @@
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+# Metadata ====================================================================
+[project]
+name = "explicit_priors"
+version = "0.1.0"
+description = "Fields-of-experts image priors whose potentials come from one linear solve."
+readme = "README.md"
+requires-python = ">= 3.10"
+license = "MIT"
+authors = [
+    { name = "Y. Haouchat", email = "youssef.haouchat@epfl.ch" },
+]
+classifiers = [
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+urls.source = "https://github.com/HaouchatY/explicit-priors"
+dependencies = [
+    "torch >= 2.1",
+]
+
+# Optional dependencies =======================================================
+[project.optional-dependencies]
+examples = [
+    "matplotlib >= 3.7",
+    "pillow >= 10",
+]
+dev = [
+    "pre-commit >= 4",
+    "pytest >= 8",
+    "ruff >= 0.12",
+]
+
+# sdist/wheel config ==========================================================
+[tool.hatch.build]
+include = [
+    "/src",
+]
+exclude = [
+    "/src/explicit_priors_tests",
+]
+packages = [
+    "src/explicit_priors",
+]
+
+# Ruff config =================================================================
+[tool.ruff]
+line-length = 120
+fix = true
+exclude = ["src/**/__init__.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Explicit priors: fields-of-experts potentials from one linear solve"
+authors:
+  - family-names: Haouchat
+    given-names: Youssef
+    email: youssef.haouchat@epfl.ch
+    affiliation: EPFL
+repository-code: "https://github.com/HaouchatY/explicit-priors"
+license: MIT
+version: 0.1.0
