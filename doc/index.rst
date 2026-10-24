@@ -84,14 +84,8 @@ Setup
    # developer install
    git clone https://github.com/HaouchatY/explicit-priors.git
    cd explicit-priors/
-   pip install -e ".[dev,doc,examples]"
+   pip install -e ".[dev,examples]"
    pre-commit install
 
    # run test suite
    pytest src/explicit_priors_tests
-
-   # build HTML docs
-   python -m sphinx -b html doc doc/_build/html
-
-   # publish them on GitHub Pages
-   dev/publish_docs.sh
