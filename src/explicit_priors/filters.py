@@ -19,14 +19,38 @@ from .foe import batched
 
 
 def normalize(filters):
-    """Zero mean and unit norm per filter."""
+    """
+    Zero mean and unit norm per filter.
+
+    Parameters
+    ----------
+    filters: Tensor
+        (K, s, s) filters.
+
+    Returns
+    -------
+    filters: Tensor
+        (K, s, s) float32.
+    """
     f = torch.as_tensor(filters, dtype=torch.float32)
     f = f - f.mean((1, 2), keepdim=True)
     return f / f.flatten(1).norm(dim=1).clamp_min(1e-12).view(-1, 1, 1)
 
 
 def stack(*banks):
-    """Concatenate banks, centre-padded to the largest (odd) size, then :py:func:`normalize`."""
+    """
+    Concatenate banks of odd sizes, centre-padded to the largest, then :py:func:`normalize`.
+
+    Parameters
+    ----------
+    banks: Tensor
+        (K_i, s_i, s_i) filters.
+
+    Returns
+    -------
+    filters: Tensor
+        (sum K_i, s, s), s = max s_i.
+    """
     s = max(b.shape[-1] for b in banks)
     out = []
     for b in banks:
@@ -46,7 +70,19 @@ def _rotated(radius, theta):
 
 
 def dct(size: int = 7):
-    """The 2-D DCT-II basis of size x size patches, without the constant: size^2 - 1 filters."""
+    """
+    The 2-D DCT-II basis without the constant.
+
+    Parameters
+    ----------
+    size: int
+        Filter support s.
+
+    Returns
+    -------
+    filters: Tensor
+        (s^2 - 1, s, s).
+    """
     n = torch.arange(size, dtype=torch.float64)
     C = torch.cos(math.pi * (2 * n[:, None] + 1) * n[None] / (2 * size))
     return normalize(torch.stack([torch.outer(C[:, k], C[:, j]) for k in range(size) for j in range(size) if k or j]))
@@ -54,8 +90,23 @@ def dct(size: int = 7):
 
 def gabor(wavelengths=(3.0, 4.5, 6.5), orientations: int = 8, aspects=(1.0, 2.0), max_size: int = 31):
     """
-    Gabor filters, even and odd: envelope std wavelength / 2 across the stripes and aspect times
-    that along them, orientations evenly spaced in [0, 180) degrees.
+    Gabor filters, even and odd.
+
+    Parameters
+    ----------
+    wavelengths: tuple
+        Wavelengths of the carrier, in pixels. The envelope has std wavelength / 2 across the stripes.
+    orientations: int
+        Orientations, evenly spaced in [0, 180) degrees.
+    aspects: tuple
+        Envelope std along the stripes, relative to the std across them.
+    max_size: int
+        Largest filter support.
+
+    Returns
+    -------
+    filters: Tensor
+        (2 len(wavelengths) len(aspects) orientations, s, s).
     """
     out = []
     for lam in wavelengths:
@@ -74,8 +125,25 @@ def gaussian_derivatives(
     sigmas=(0.8, 1.2, 1.8, 2.7, 4.0), orders=(1, 2, 3, 4), orientations: int = 4, aspect: float = 1.0, max_size=31
 ):
     """
-    n-th directional derivatives of a Gaussian of std sigma across and aspect * sigma along the
-    direction, orientations evenly spaced in [0, 180) degrees.
+    Directional derivatives of Gaussians.
+
+    Parameters
+    ----------
+    sigmas: tuple
+        Gaussian std across the direction of derivation, in pixels.
+    orders: tuple
+        Orders of derivation.
+    orientations: int
+        Directions, evenly spaced in [0, 180) degrees.
+    aspect: float
+        Gaussian std along the direction, relative to the std across it.
+    max_size: int
+        Largest filter support.
+
+    Returns
+    -------
+    filters: Tensor
+        (len(sigmas) len(orders) orientations, s, s).
     """
     out = []
     for s in sigmas:
@@ -99,7 +167,21 @@ def _hermite(n, x):
 
 
 def laplacian_of_gaussian(sigmas=(0.8, 1.2, 1.8, 2.7, 4.0), max_size: int = 31):
-    """Laplacians of Gaussians."""
+    """
+    Laplacians of Gaussians.
+
+    Parameters
+    ----------
+    sigmas: tuple
+        Gaussian std, in pixels.
+    max_size: int
+        Largest filter support.
+
+    Returns
+    -------
+    filters: Tensor
+        (len(sigmas), s, s).
+    """
     out = []
     for s in sigmas:
         X, Y = _grid(min((max_size - 1) // 2, math.ceil(3.5 * s)))
@@ -127,8 +209,21 @@ def _whitening(images, size, stride):
 
 def pca(images, size: int = 7, stride: int = 2):
     """
-    Principal components of size x size patches, without the constant, by decreasing variance:
-    size^2 - 1 filters. For Gaussian images they are the optimal filters.
+    Principal components of image patches, without the constant, by decreasing variance.
+
+    Parameters
+    ----------
+    images: Tensor | list
+        (N, H, W) images, or a list of (H, W) images.
+    size: int
+        Filter support s.
+    stride: int
+        Patch stride.
+
+    Returns
+    -------
+    filters: Tensor
+        (s^2 - 1, s, s).
     """
     _, V = _whitening(images, size, stride)
     return normalize(V.T.reshape(-1, size, size))
@@ -136,8 +231,22 @@ def pca(images, size: int = 7, stride: int = 2):
 
 def ica(images, size: int = 7, stride: int = 2):
     """
-    Closed-form ICA (FOBI, Cardoso 1989) of size x size patches: whiten the patches, then
-    diagonalise their fourth-order moment matrix. size^2 - 1 sparse filters.
+    Independent components of image patches in closed form (FOBI :cite:`cardoso1989source`): whitened patches,
+    then the eigenvectors of their fourth-order moment matrix.
+
+    Parameters
+    ----------
+    images: Tensor | list
+        (N, H, W) images, or a list of (H, W) images.
+    size: int
+        Filter support s.
+    stride: int
+        Patch stride.
+
+    Returns
+    -------
+    filters: Tensor
+        (s^2 - 1, s, s).
     """
     lam, V = _whitening(images, size, stride)
     Wh = V / lam.sqrt()
@@ -151,8 +260,13 @@ def ica(images, size: int = 7, stride: int = 2):
 
 def symmetrize(filters):
     """
-    The 8 rotations and reflections of every filter, and groups that make each orbit share one
-    potential: pass both to :py:func:`~explicit_priors.fit`.
+    The 8 rotations and reflections of every filter, with groups that make each orbit share one potential.
+    Pass both to :py:func:`~explicit_priors.fit`.
+
+    Parameters
+    ----------
+    filters: Tensor
+        (K, s, s) filters.
 
     Returns
     -------
@@ -167,7 +281,21 @@ def symmetrize(filters):
 
 
 def dilate(filters, factor: int):
-    """The same filters at a coarser scale: taps spread by factor, then a Gaussian low-pass of std factor / 2."""
+    """
+    The same filters at a coarser scale: taps spread by factor, then a Gaussian low-pass of std factor / 2.
+
+    Parameters
+    ----------
+    filters: Tensor
+        (K, s, s) filters.
+    factor: int
+        Scale factor.
+
+    Returns
+    -------
+    filters: Tensor
+        (K, s', s').
+    """
     f = torch.as_tensor(filters, dtype=torch.float32)
     K, s, _ = f.shape
     up = torch.zeros(K, factor * (s - 1) + 1, factor * (s - 1) + 1)

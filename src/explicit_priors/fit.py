@@ -251,7 +251,7 @@ def fit(
     groups: Tensor
         (K,) potential index of every filter, e.g. from :py:func:`~explicit_priors.filters.symmetrize`.
     shape: str
-        "free", "monotone" (even, non-decreasing in |z|) or "convex". Default: "monotone" for "map",
+        "free", "monotone" (even, non-decreasing in :math:`|z|`) or "convex". Default: "monotone" for "map",
         "free" otherwise.
     val: float
         Fraction of the images held out to choose the regularisation.

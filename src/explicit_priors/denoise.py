@@ -57,8 +57,8 @@ def one_step(prior, y, sigma: float = None, pad: int = None):
 
 def fista(fun, x0, iters: int = 100, value=None, step: float = 1.0):
     r"""
-    Minimise a smooth function of a batch of images: FISTA with backtracking (Beck--Teboulle)
-    and momentum restart when the objective rises.
+    Minimise a smooth function of a batch of images: FISTA :cite:`beck2009fast` with backtracking and momentum
+    restart when the objective rises.
 
     Parameters
     ----------

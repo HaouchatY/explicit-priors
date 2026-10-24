@@ -161,6 +161,7 @@ class FoE(torch.nn.Module):
         return z, self.scale[:, None] * self.basis.phi(u[None], self.coef)[0]
 
     def save(self, path):
+        """Save the filters, basis, scales, coefficients and fit settings to a file."""
         torch.save(
             dict(
                 filters=self.filters.cpu(),
@@ -176,6 +177,7 @@ class FoE(torch.nn.Module):
 
     @classmethod
     def load(cls, path, map_location=None):
+        """A prior saved by :py:meth:`save`, on the device map_location."""
         d = torch.load(path, map_location=map_location, weights_only=True)
         m = cls(d["filters"], ep_basis.from_config(d["basis"]), d["groups"], d["scale"], d["coef"])
         m.sigma, m.objective = d["sigma"], d["objective"]

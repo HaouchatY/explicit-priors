@@ -32,6 +32,10 @@ examples = [
     "matplotlib >= 3.7",
     "pillow >= 10",
 ]
+doc = [
+    "sphinx >= 7",
+    "sphinxcontrib-bibtex >= 2",
+]
 dev = [
     "pre-commit >= 4",
     "pytest >= 8",
