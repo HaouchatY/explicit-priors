@@ -9,3 +9,4 @@ from .basis import (
     Gauss as Gauss,
     Hat as Hat,
 )
+from .foe import FoE as FoE
