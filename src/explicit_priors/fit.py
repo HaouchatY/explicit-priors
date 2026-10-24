@@ -309,8 +309,9 @@ def fit(
         prior.coef.copy_(c.view_as(prior.coef))
         prior.sigma, prior.objective = sigma, objective
         log(f"fit {objective}: {prior.coef.numel()} coefficients, ridge {reg[0]:g}, smooth {reg[1]:g}")
+        warm = {}  # MAP points of the previous step, to warm-start the next one
         for it in range(refine if objective == "map" else 0):
-            c = _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg)
+            c = _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg, warm)
             if c is None:
                 break
             prior.coef.copy_(c.view_as(prior.coef))
@@ -318,7 +319,7 @@ def fit(
     return prior
 
 
-def _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg):
+def _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg, warm):
     r"""One damped Gauss--Newton step on :math:`E\|\hat x_{MAP}(y) - x\|^2`: the features at the current
     MAP estimates, the target (y - x) / sigma^2. The step length is chosen on the held-out images."""
 
@@ -327,8 +328,9 @@ def _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg):
 
     def at_map(imgs, seed_):
         out = []
-        for x, y in _noisy(imgs, sigma, mb, device, seed_):
-            m = map_estimate(prior, y)
+        for j, (x, y) in enumerate(_noisy(imgs, sigma, mb, device, seed_)):
+            m = map_estimate(prior, y, iters=40 if j in warm else 100, x0=warm.get(j))
+            warm[j] = m
             out += [(x[i : i + batch], y[i : i + batch], m[i : i + batch]) for i in range(0, len(x), batch)]
         return out
 
@@ -338,14 +340,17 @@ def _gauss_newton(prior, train, held, sigma, batch, device, seed, R, T, reg):
     c0 = prior.coef.reshape(-1).double().clone()
     va = list(_noisy(held if len(held) else train, sigma, mb, device, seed + 1))
 
-    def loss(c):
+    def val_loss(c, starts):
         prior.coef.copy_(c.view_as(prior.coef))
-        return sum(float(((map_estimate(prior, y) - x) ** 2).sum()) for x, y in va)
+        ms = [map_estimate(prior, y, iters=100 if x0 is None else 40, x0=x0) for (_, y), x0 in zip(va, starts)]
+        return sum(float(((m - x) ** 2).sum()) for (x, _), m in zip(va, ms)), ms
 
-    best = (loss(c0), c0)
+    l0, ms0 = val_loss(c0, [warm.get(("val", j)) for j in range(len(va))])
+    warm.update({("val", j): m for j, m in enumerate(ms0)})
+    best = (l0, c0)
     for a in (1.0, 0.5, 0.25):
         c = c0 + a * (c_gn - c0)
-        l_ = loss(c)
+        l_ = val_loss(c, ms0)[0]
         if l_ < best[0]:
             best = (l_, c)
     prior.coef.copy_(c0.view_as(prior.coef))
