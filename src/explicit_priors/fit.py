@@ -37,26 +37,38 @@ SMOOTHS = (0.0, 1.0, 10.0, 100.0, 1e3, 1e4)
 
 
 # ---------------------------------------------------------------------------- normal equations
+def _chunks(prior, x):
+    """Filter ranges whose basis fields fit in about 1.6 GB."""
+    K, n = prior.filters.shape[0], prior.basis.size
+    c = max(1, int(4e8 // (x.shape[0] * n * x.shape[-2] * x.shape[-1])))
+    return [(k, min(K, k + c)) for k in range(0, K, c)]
+
+
 def features(prior, x):
     """(B, H, W) -> (B, G n, H, W): the gradient fields of all basis potentials."""
-    K, n = prior.filters.shape[0], prior.basis.size
+    n, n_pot = prior.basis.size, prior.coef.shape[0]
     s, _ = prior._per_filter()
-    b = prior.basis.features(prior.responses(x) / s)  # (B, K, h, w, n)
-    B, _, h, w, _ = b.shape
-    b = b.permute(0, 1, 4, 2, 3).reshape(B, K * n, h, w)
-    G = F.conv_transpose2d(b, prior.filters.repeat_interleave(n, 0)[:, None], groups=K * n)
-    n_pot = prior.coef.shape[0]
-    if n_pot < K:  # tied filters: sum the fields of a group
-        G = G.new_zeros(B, n_pot, n, *G.shape[-2:]).index_add_(1, prior.groups, G.view(B, K, n, *G.shape[-2:]))
-    return G.reshape(B, n_pot * n, *G.shape[-2:])
+    z = prior.responses(x)
+    B, _, h, w = z.shape
+    G = z.new_zeros(B, n_pot, n, *x.shape[-2:])
+    for k0, k1 in _chunks(prior, x):
+        b = prior.basis.features(z[:, k0:k1] / s[:, k0:k1])  # (B, k, h, w, n)
+        b = b.permute(0, 1, 4, 2, 3).reshape(B, (k1 - k0) * n, h, w)
+        Gk = F.conv_transpose2d(b, prior.filters[k0:k1].repeat_interleave(n, 0)[:, None], groups=(k1 - k0) * n)
+        G.index_add_(1, prior.groups[k0:k1], Gk.view(B, k1 - k0, n, *x.shape[-2:]))
+    return G.reshape(B, n_pot * n, *x.shape[-2:])
 
 
 def divergence(prior, x):
     r"""(G n,) :math:`\sum_{\text{batch}} \Delta` of every basis potential."""
     s, _ = prior._per_filter()
-    db = prior.basis.derivatives(prior.responses(x) / s) / s[..., None]
-    per = db.sum((0, 2, 3), dtype=torch.float64) * (prior.filters.double() ** 2).sum((1, 2))[:, None]
-    return per.new_zeros(prior.coef.shape).index_add_(0, prior.groups, per).reshape(-1)
+    z = prior.responses(x)
+    norms = (prior.filters.double() ** 2).sum((1, 2))
+    out = torch.zeros(prior.coef.shape, device=z.device, dtype=torch.float64)
+    for k0, k1 in _chunks(prior, x):
+        db = prior.basis.derivatives(z[:, k0:k1] / s[:, k0:k1]) / s[:, k0:k1, ..., None]
+        out.index_add_(0, prior.groups[k0:k1], db.sum((0, 2, 3), dtype=torch.float64) * norms[k0:k1, None])
+    return out.reshape(-1)
 
 
 def normal_equations(prior, pairs):
