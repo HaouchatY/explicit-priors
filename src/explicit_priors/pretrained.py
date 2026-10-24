@@ -6,7 +6,9 @@ at their noise level, or as regularisers for inverse problems.
 ====================  ==========
 name                  noise std
 ====================  ==========
+``"map_0.05"``        0.05
 ``"map_0.1"``         0.1
+``"map_0.2"``         0.2
 ====================  ==========
 """
 
