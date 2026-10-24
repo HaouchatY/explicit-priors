@@ -4,6 +4,17 @@ API Reference
 Images are PyTorch tensors with values in [0, 1], of shape (H, W) or (B, H, W), on CPU or GPU.
 
 
+Pretrained Priors
+-----------------
+
+.. automodule:: explicit_priors.pretrained
+   :no-members:
+
+.. autofunction:: explicit_priors.pretrained
+
+.. autofunction:: explicit_priors.available
+
+
 Fitting
 -------
 

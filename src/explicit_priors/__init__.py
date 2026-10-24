@@ -22,3 +22,7 @@ from .fit import (
 )
 from .foe import FoE as FoE
 from .learn import learn_filters as learn_filters
+from .pretrained import (
+    available as available,
+    pretrained as pretrained,
+)
