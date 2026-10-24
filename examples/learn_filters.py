@@ -1,7 +1,7 @@
 """
 Learn filters with their potentials, then compare them with the DCT bank under the same fit.
 
-    python examples/learn_filters.py --data path/to/BSD --sigma 12.75 --filters 16
+    python examples/learn_filters.py --data path/to/BSD --sigma 0.05 --filters 16
 """
 
 import argparse
@@ -14,13 +14,13 @@ import explicit_priors as ep
 
 p = argparse.ArgumentParser()
 p.add_argument("--data", required=True)
-p.add_argument("--sigma", type=float, default=12.75, help="noise std, in 1/255")
+p.add_argument("--sigma", type=float, default=0.05, help="noise std")
 p.add_argument("--filters", type=int, default=16)
 p.add_argument("--size", type=int, default=7)
 p.add_argument("--steps", type=int, default=1500)
 p.add_argument("--save", default=None, help="where to save the learned filters")
 a = p.parse_args()
-s = a.sigma / 255
+s = a.sigma
 
 train, test = load(f"{a.data}/train"), load(f"{a.data}/Set68")
 t0 = time.perf_counter()

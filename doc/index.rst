@@ -69,7 +69,7 @@ Usage
 
    import explicit_priors as ep
 
-   prior = ep.fit(ep.filters.dct(7), images, sigma=25 / 255, objective="map")
+   prior = ep.fit(ep.filters.dct(7), images, sigma=0.1, objective="map")
    x = ep.denoise(prior, y)
 
 

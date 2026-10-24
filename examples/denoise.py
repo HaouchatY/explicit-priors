@@ -1,7 +1,7 @@
 """
 Fit a prior on BSD400, denoise Set12 and BSD68.
 
-    python examples/denoise.py --data path/to/BSD --sigma 25 --objective map
+    python examples/denoise.py --data path/to/BSD --sigma 0.1 --objective map
 
 --data holds train/ (400 images), Set12/ and Set68/.
 """
@@ -22,12 +22,12 @@ BANKS = {
 
 p = argparse.ArgumentParser()
 p.add_argument("--data", required=True)
-p.add_argument("--sigma", type=float, default=25.0, help="noise std, in 1/255")
+p.add_argument("--sigma", type=float, default=0.1, help="noise std")
 p.add_argument("--objective", default="mse", choices=["mse", "map"])
 p.add_argument("--filters", default="dct7", help=f"{' | '.join(BANKS)} | path to a (K, s, s) tensor")
 p.add_argument("--refine", type=int, default=0, help="Gauss-Newton steps (map)")
 a = p.parse_args()
-s = a.sigma / 255
+s = a.sigma
 
 filters = BANKS[a.filters]() if a.filters in BANKS else torch.load(a.filters)
 train = load(f"{a.data}/train")

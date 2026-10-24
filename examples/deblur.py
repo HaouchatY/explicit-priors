@@ -19,13 +19,13 @@ import explicit_priors as ep
 p = argparse.ArgumentParser()
 p.add_argument("--data", required=True)
 p.add_argument("--blur", type=float, default=1.6, help="std of the Gaussian blur, in pixels")
-p.add_argument("--noise", type=float, default=2.55, help="noise std, in 1/255")
-p.add_argument("--sigma", type=float, default=15.0, help="noise std the prior is fitted at, in 1/255")
+p.add_argument("--noise", type=float, default=0.01, help="noise std")
+p.add_argument("--sigma", type=float, default=0.06, help="noise std the prior is fitted at")
 p.add_argument("--iters", type=int, default=300)
 a = p.parse_args()
-noise = a.noise / 255
+noise = a.noise
 
-prior = ep.fit(ep.filters.dct(7), load(f"{a.data}/train"), sigma=a.sigma / 255, objective="map")
+prior = ep.fit(ep.filters.dct(7), load(f"{a.data}/train"), sigma=a.sigma, objective="map")
 
 
 def blur_operator(shape):
@@ -56,4 +56,4 @@ for x in load(f"{a.data}/Set12"):
         xh = ep.fista(fun, y[None], a.iters)[0]
     before.append(psnr(y, x))
     after.append(psnr(xh, x))
-print(f"Set12, blur {a.blur} px, noise {a.noise}/255: {sum(before) / 12:.2f} dB -> {sum(after) / 12:.2f} dB")
+print(f"Set12, blur {a.blur} px, noise {a.noise}: {sum(before) / 12:.2f} dB -> {sum(after) / 12:.2f} dB")

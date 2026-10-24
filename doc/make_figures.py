@@ -19,12 +19,12 @@ import explicit_priors as ep  # noqa: E402
 p = argparse.ArgumentParser()
 p.add_argument("--data", required=True)
 p.add_argument("--filters", default="dct3", help="dct3 | learned | path to a (K, s, s) tensor")
-p.add_argument("--sigma", type=float, default=25.0)
+p.add_argument("--sigma", type=float, default=0.1)
 p.add_argument("--size", type=int, default=7)
 p.add_argument("--steps", type=int, default=1500)
 p.add_argument("--out", default=str(Path(__file__).resolve().parent / "potentials.png"))
 a = p.parse_args()
-s = a.sigma / 255
+s = a.sigma
 
 train = load(f"{a.data}/train")
 if a.filters == "learned":

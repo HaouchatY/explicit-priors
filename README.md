@@ -6,7 +6,7 @@
 Explicit Priors fits fields-of-experts image priors in closed form: one linear solve, no training loop.
 
 <p align="center"><img src="doc/potentials.png" width="720" alt="3x3 DCT filters and their MAP potentials"></p>
-<p align="center"><sub>3×3 DCT filters and their MAP potentials, noise 25/255, 400 BSD images:
+<p align="center"><sub>3×3 DCT filters and their MAP potentials, noise 0.1, 400 BSD images:
 <code>python doc/make_figures.py --data path/to/BSD</code></sub></p>
 
 ## Setup

@@ -48,7 +48,7 @@ def learn_filters(
     images,
     n_filters: int = 16,
     size: int = 7,
-    sigma: float = 25 / 255,
+    sigma: float = 0.1,
     steps: int = 1000,
     batch: int = 16,
     crop: int = 96,
