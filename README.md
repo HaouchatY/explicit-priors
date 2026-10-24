@@ -7,7 +7,8 @@ Fields-of-experts image priors whose potentials come from one linear solve.
 <p align="center"><img src="doc/potentials.png" width="760" alt="DCT 3x3 filters and their MAP potentials"></p>
 
 *Top: the 8 filters of the 3×3 DCT. Bottom: their potentials $\phi_k$, from
-`ep.fit(ep.filters.dct(3), train, sigma=25 / 255, objective="map")` on the 400 BSD training images
+`ep.fit(ep.filters.dct(3), train, sigma=25 / 255, objective="map")` (monotone, the default for `"map"`: even and
+non-decreasing in $|z|$, not convex) on the 400 BSD training images
 (180×180, as in DnCNN and WCRR), 2 s on one H200. Each curve is shifted to a minimum of 0 and drawn up
 to 1.6 times the response where it reaches 95% of its plateau. To reproduce:*
 `python doc/make_figures.py --data path/to/BSD` *(with `train/` in `path/to/BSD`).*
