@@ -5,6 +5,7 @@ try:
 except importlib.metadata.PackageNotFoundError:  # source tree, not installed
     __version__ = "unknown"
 
+from . import filters as filters
 from .basis import (
     Gauss as Gauss,
     Hat as Hat,
