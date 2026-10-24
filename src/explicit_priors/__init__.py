@@ -16,4 +16,8 @@ from .denoise import (
     map_estimate as map_estimate,
     one_step as one_step,
 )
+from .fit import (
+    fit as fit,
+    normal_equations as normal_equations,
+)
 from .foe import FoE as FoE
