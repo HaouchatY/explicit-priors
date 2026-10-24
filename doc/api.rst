@@ -9,6 +9,7 @@ Pretrained Priors
 
 .. automodule:: explicit_priors.pretrained
    :no-members:
+   :no-index:
 
 .. autofunction:: explicit_priors.pretrained
 
