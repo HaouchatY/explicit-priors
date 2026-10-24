@@ -1,0 +1,693 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Reference &#8212; Explicit Priors 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
+    
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>window.MathJax = {"tex": {"macros": {"bbx": "{\\bf{x}}", "bby": "{\\bf{y}}", "bbm": "{\\bf{m}}", "bbf": "{\\bf{f}}", "bbc": "{\\bf{c}}", "bbd": "{\\bf{d}}", "bbA": "{\\bf{A}}", "bbG": "{\\bf{G}}", "bbW": "{\\bf{W}}", "bE": "{\\mathbb{E}}", "bR": "{\\mathbb{R}}", "argmin": "\\operatorname*{arg\\,min}", "norm": ["\\left\\| #1 \\right\\|", 1]}}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Explicit Priors" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="references.html" title="References"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Explicit Priors"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Explicit Priors 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Reference</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<p>Images are PyTorch tensors with values in [0, 1], of shape (H, W) or (B, H, W), on CPU or GPU.</p>
+<section id="pretrained-priors">
+<h2>Pretrained Priors<a class="headerlink" href="#pretrained-priors" title="Link to this heading">¶</a></h2>
+<p>Priors shipped with the package: MAP priors on 485 analytic filters (31 x 31) with monotone potentials, fitted in
+closed form on the 400 BSD training images (8 Gauss-Newton steps). Use them with <a class="reference internal" href="#explicit_priors.denoise" title="explicit_priors.denoise"><code class="xref py py-func docutils literal notranslate"><span class="pre">denoise()</span></code></a>
+at their noise level, or as regularisers for inverse problems.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>noise std</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;map_0.05&quot;</span></code></p></td>
+<td><p>0.05</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;map_0.1&quot;</span></code></p></td>
+<td><p>0.1</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;map_0.2&quot;</span></code></p></td>
+<td><p>0.2</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.pretrained">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">pretrained</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/pretrained.html#pretrained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.pretrained" title="Link to this definition">¶</a></dt>
+<dd><p>A shipped prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – One of <a class="reference internal" href="#explicit_priors.available" title="explicit_priors.available"><code class="xref py py-func docutils literal notranslate"><span class="pre">available()</span></code></a>, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;map_0.1&quot;</span></code>.</p></li>
+<li><p><strong>map_location</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Device to load to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>prior</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE">FoE</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.available">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/pretrained.html#available"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.available" title="Link to this definition">¶</a></dt>
+<dd><p>Names of the shipped priors.</p>
+</dd></dl>
+
+</section>
+<section id="fitting">
+<h2>Fitting<a class="headerlink" href="#fitting" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.fit">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/fit.html#fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the potentials of a fields of experts in closed form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filters</strong> (<em>Tensor</em><em> | </em><a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE"><em>FoE</em></a>) – (K, s, s) filters (see <code class="xref py py-mod docutils literal notranslate"><span class="pre">filters</span></code>), or a prior whose filters,
+basis and groups are reused.</p></li>
+<li><p><strong>images</strong> (<em>Tensor</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a>) – Clean training images in [0, 1]: (N, H, W), or a list of (H, W).</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Noise std of the denoiser (“mse”, “map”).</p></li>
+<li><p><strong>objective</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – “score” (prior of clean images), “mse” (one-step denoiser) or “map” (MAP denoiser).</p></li>
+<li><p><strong>basis</strong> (<a class="reference internal" href="#explicit_priors.Hat" title="explicit_priors.Hat"><em>Hat</em></a><em> | </em><a class="reference internal" href="#explicit_priors.Gauss" title="explicit_priors.Gauss"><em>Gauss</em></a>) – Potential basis (default: <a class="reference internal" href="#explicit_priors.Hat" title="explicit_priors.Hat"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hat</span></code></a>).</p></li>
+<li><p><strong>groups</strong> (<em>Tensor</em>) – (K,) potential index of every filter, e.g. from <a class="reference internal" href="#explicit_priors.filters.symmetrize" title="explicit_priors.filters.symmetrize"><code class="xref py py-func docutils literal notranslate"><span class="pre">symmetrize()</span></code></a>.</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – “free”, “monotone” (even, non-decreasing in <span class="math notranslate nohighlight">\(|z|\)</span>) or “convex”. Default: “monotone” for “map”,
+“free” otherwise.</p></li>
+<li><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Fraction of the images held out to choose the regularisation.</p></li>
+<li><p><strong>reg</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – “auto”, or (ridge, smooth).</p></li>
+<li><p><strong>refine</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Gauss–Newton steps on the MAP denoiser (“map” only).</p></li>
+<li><p><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Images per batch (default: from the problem size).</p></li>
+<li><p><strong>device</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Default: CUDA if available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>prior</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE">FoE</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.learn_filters">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">learn_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">96</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whiten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restarts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/learn.html#learn_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.learn_filters" title="Link to this definition">¶</a></dt>
+<dd><p>Learn filters for the one-step denoiser at noise sigma, with the potentials solved at every step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> (<em>Tensor</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a>) – Clean training images in [0, 1], at least crop x crop.</p></li>
+<li><p><strong>n_filters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Number of filters K.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Filter support s.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Noise std.</p></li>
+<li><p><strong>steps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Gradient steps (Adam, cosine learning-rate decay).</p></li>
+<li><p><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Random crops per step and their size.</p></li>
+<li><p><strong>crop</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Random crops per step and their size.</p></li>
+<li><p><strong>lr</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Learning rate.</p></li>
+<li><p><strong>whiten</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – Parametrise the filters in whitened patch coordinates (better conditioned).</p></li>
+<li><p><strong>init</strong> (<em>Tensor</em>) – (K, s, s) initial filters (default: random).</p></li>
+<li><p><strong>restarts</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Times the least useful filters (value &lt; 0.1 x max) are re-initialised.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (K, s, s) zero-mean, unit-norm filters, ready for <a class="reference internal" href="#explicit_priors.fit" title="explicit_priors.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="model">
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="explicit_priors.FoE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">FoE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE" title="Link to this definition">¶</a></dt>
+<dd><p>Fields of experts <span class="math notranslate nohighlight">\(\Phi(x) = \sum_k \sum_i \phi_k((f_k \star x)_i)\)</span>.</p>
+<p>Built by <a class="reference internal" href="#explicit_priors.fit" title="explicit_priors.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a>. Calling the model returns <span class="math notranslate nohighlight">\(\Phi(x)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filters</strong> (<em>Tensor</em>) – (K, s, s) filters.</p></li>
+<li><p><strong>basis</strong> (<a class="reference internal" href="#explicit_priors.Hat" title="explicit_priors.Hat"><em>Hat</em></a><em> | </em><a class="reference internal" href="#explicit_priors.Gauss" title="explicit_priors.Gauss"><em>Gauss</em></a>) – Basis of <span class="math notranslate nohighlight">\(\psi_k = \phi_k'\)</span> (default: <a class="reference internal" href="#explicit_priors.Hat" title="explicit_priors.Hat"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hat</span></code></a>).</p></li>
+<li><p><strong>groups</strong> (<em>Tensor</em>) – (K,) potential index of every filter (default: one potential per filter).</p></li>
+<li><p><strong>scale</strong> (<em>Tensor</em>) – (G,) scale of every potential.</p></li>
+<li><p><strong>coef</strong> (<em>Tensor</em>) – (G, n) coefficients of every potential.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.responses">
+<span class="sig-name descname"><span class="pre">responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.responses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.responses" title="Link to this definition">¶</a></dt>
+<dd><p>(B, H, W) -&gt; (B, K, H-s+1, W-s+1).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.psi">
+<span class="sig-name descname"><span class="pre">psi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.psi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.psi" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\psi_k(z_k)\)</span> for (B, K, …) responses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.phi">
+<span class="sig-name descname"><span class="pre">phi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.phi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.phi" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\phi_k(z_k)\)</span> for (B, K, …) responses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.energy">
+<span class="sig-name descname"><span class="pre">energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.energy" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\Phi(x)\)</span>, (B,) in float64, for (B, H, W) or (H, W) images.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.grad">
+<span class="sig-name descname"><span class="pre">grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.grad" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\nabla \Phi(x)\)</span>, same shape as x.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.energy_grad">
+<span class="sig-name descname"><span class="pre">energy_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.energy_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.energy_grad" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\((\Phi(x), \nabla \Phi(x))\)</span> with one correlation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.potentials">
+<span class="sig-name descname"><span class="pre">potentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">401</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.potentials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.potentials" title="Link to this definition">¶</a></dt>
+<dd><p>The potentials on a grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>z</strong> (<em>Tensor</em>) – (G, n) grid of every potential, on <span class="math notranslate nohighlight">\([-\text{extent}\, s_g, \text{extent}\, s_g]\)</span>.</p></li>
+<li><p><strong>phi</strong> (<em>Tensor</em>) – (G, n) values <span class="math notranslate nohighlight">\(\phi_g(z)\)</span>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save the filters, basis, scales, coefficients and fit settings to a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="explicit_priors.FoE.load">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/foe.html#FoE.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.FoE.load" title="Link to this definition">¶</a></dt>
+<dd><p>A prior saved by <a class="reference internal" href="#explicit_priors.FoE.save" title="explicit_priors.FoE.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a>, on the device map_location.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="denoising-and-inverse-problems">
+<h2>Denoising and Inverse Problems<a class="headerlink" href="#denoising-and-inverse-problems" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.denoise">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">denoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/denoise.html#denoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.denoise" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#explicit_priors.one_step" title="explicit_priors.one_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">one_step()</span></code></a> for <code class="docutils literal notranslate"><span class="pre">objective=&quot;mse&quot;</span></code> priors, <a class="reference internal" href="#explicit_priors.map_estimate" title="explicit_priors.map_estimate"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_estimate()</span></code></a> otherwise.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.one_step">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">one_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/denoise.html#one_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.one_step" title="Link to this definition">¶</a></dt>
+<dd><p>One-step (Tweedie) denoiser <span class="math notranslate nohighlight">\(y - \sigma^2 \nabla \Phi(y)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prior</strong> (<a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE"><em>FoE</em></a>) – Prior, usually fitted with <code class="docutils literal notranslate"><span class="pre">objective=&quot;mse&quot;</span></code>.</p></li>
+<li><p><strong>y</strong> (<em>Tensor</em>) – (H, W) or (B, H, W) noisy images.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Noise std (default: <code class="docutils literal notranslate"><span class="pre">prior.sigma</span></code>).</p></li>
+<li><p><strong>pad</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Reflect padding (default: filter size - 1).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.map_estimate">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">map_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/denoise.html#map_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.map_estimate" title="Link to this definition">¶</a></dt>
+<dd><p>MAP denoiser <span class="math notranslate nohighlight">\(\arg\min_x \tfrac12 \|x - y\|^2 + \beta \Phi(x)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prior</strong> (<a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE"><em>FoE</em></a>) – Prior, usually fitted with <code class="docutils literal notranslate"><span class="pre">objective=&quot;map&quot;</span></code>.</p></li>
+<li><p><strong>y</strong> (<em>Tensor</em>) – (H, W) or (B, H, W) noisy images.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Noise std (default: <code class="docutils literal notranslate"><span class="pre">prior.sigma</span></code>).</p></li>
+<li><p><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Weight of the prior (default: <span class="math notranslate nohighlight">\(\sigma^2\)</span>, the Bayesian weight; no tuning needed for
+<code class="docutils literal notranslate"><span class="pre">objective=&quot;map&quot;</span></code>).</p></li>
+<li><p><strong>iters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – FISTA iterations.</p></li>
+<li><p><strong>x0</strong> (<em>Tensor</em>) – Initial point (default: y).</p></li>
+<li><p><strong>pad</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Reflect padding.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.fista">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">fista</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/denoise.html#fista"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.fista" title="Link to this definition">¶</a></dt>
+<dd><p>Minimise a smooth function of a batch of images: FISTA <span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id7" title="Amir Beck and Marc Teboulle. A fast iterative shrinkage-thresholding algorithm for linear inverse problems. SIAM Journal on Imaging Sciences, 2(1):183–202, 2009.">1</a>]</span> with backtracking and momentum
+restart when the objective rises.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fun</strong> (<em>callable</em>) – x -&gt; (value (B,) float64, gradient (B, …)).</p></li>
+<li><p><strong>x0</strong> (<em>Tensor</em>) – (B, …) initial point.</p></li>
+<li><p><strong>iters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Number of iterations.</p></li>
+<li><p><strong>value</strong> (<em>callable</em>) – x -&gt; value (B,), cheaper than <code class="docutils literal notranslate"><span class="pre">fun</span></code> (default: <code class="docutils literal notranslate"><span class="pre">fun(x)[0]</span></code>).</p></li>
+<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Initial step 1 / L.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> – (B, …) minimisers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="filter-banks">
+<h2>Filter Banks<a class="headerlink" href="#filter-banks" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.dct">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">dct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#dct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.dct" title="Link to this definition">¶</a></dt>
+<dd><p>The 2-D DCT-II basis without the constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Filter support s.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (s^2 - 1, s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.gabor">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">gabor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3.0,</span> <span class="pre">4.5,</span> <span class="pre">6.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1.0,</span> <span class="pre">2.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#gabor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.gabor" title="Link to this definition">¶</a></dt>
+<dd><p>Gabor filters, even and odd.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavelengths</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – Wavelengths of the carrier, in pixels. The envelope has std wavelength / 2 across the stripes.</p></li>
+<li><p><strong>orientations</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Orientations, evenly spaced in [0, 180) degrees.</p></li>
+<li><p><strong>aspects</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – Envelope std along the stripes, relative to the std across them.</p></li>
+<li><p><strong>max_size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Largest filter support.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (2 len(wavelengths) len(aspects) orientations, s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.gaussian_derivatives">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">gaussian_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.8,</span> <span class="pre">1.2,</span> <span class="pre">1.8,</span> <span class="pre">2.7,</span> <span class="pre">4.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#gaussian_derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.gaussian_derivatives" title="Link to this definition">¶</a></dt>
+<dd><p>Directional derivatives of Gaussians.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigmas</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – Gaussian std across the direction of derivation, in pixels.</p></li>
+<li><p><strong>orders</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – Orders of derivation.</p></li>
+<li><p><strong>orientations</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Directions, evenly spaced in [0, 180) degrees.</p></li>
+<li><p><strong>aspect</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Gaussian std along the direction, relative to the std across it.</p></li>
+<li><p><strong>max_size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Largest filter support.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (len(sigmas) len(orders) orientations, s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.laplacian_of_gaussian">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">laplacian_of_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigmas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.8,</span> <span class="pre">1.2,</span> <span class="pre">1.8,</span> <span class="pre">2.7,</span> <span class="pre">4.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#laplacian_of_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.laplacian_of_gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Laplacians of Gaussians.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigmas</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a>) – Gaussian std, in pixels.</p></li>
+<li><p><strong>max_size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Largest filter support.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (len(sigmas), s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.pca">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.pca" title="Link to this definition">¶</a></dt>
+<dd><p>Principal components of image patches, without the constant, by decreasing variance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> (<em>Tensor</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a>) – (N, H, W) images, or a list of (H, W) images.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Filter support s.</p></li>
+<li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Patch stride.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (s^2 - 1, s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.ica">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">ica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#ica"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.ica" title="Link to this definition">¶</a></dt>
+<dd><p>Independent components of image patches in closed form (FOBI <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id8" title="Jean-François Cardoso. Source separation using higher order moments. In International Conference on Acoustics, Speech, and Signal Processing, 2109–2112. 1989.">2</a>]</span>): whitened patches,
+then the eigenvectors of their fourth-order moment matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> (<em>Tensor</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a>) – (N, H, W) images, or a list of (H, W) images.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Filter support s.</p></li>
+<li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Patch stride.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (s^2 - 1, s, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.symmetrize">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">symmetrize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#symmetrize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.symmetrize" title="Link to this definition">¶</a></dt>
+<dd><p>The 8 rotations and reflections of every filter, with groups that make each orbit share one potential.
+Pass both to <a class="reference internal" href="#explicit_priors.fit" title="explicit_priors.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filters</strong> (<em>Tensor</em>) – (K, s, s) filters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>filters</strong> (<em>Tensor</em>) – (8K, s, s) filters.</p></li>
+<li><p><strong>groups</strong> (<em>Tensor</em>) – (8K,) potential index.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.stack">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">banks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.stack" title="Link to this definition">¶</a></dt>
+<dd><p>Concatenate banks of odd sizes, centre-padded to the largest, then <a class="reference internal" href="#explicit_priors.filters.normalize" title="explicit_priors.filters.normalize"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>banks</strong> (<em>Tensor</em>) – (K_i, s_i, s_i) filters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (sum K_i, s, s), s = max s_i.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.dilate">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">dilate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#dilate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.dilate" title="Link to this definition">¶</a></dt>
+<dd><p>The same filters at a coarser scale: taps spread by factor, then a Gaussian low-pass of std factor / 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filters</strong> (<em>Tensor</em>) – (K, s, s) filters.</p></li>
+<li><p><strong>factor</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Scale factor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (K, s’, s’).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.filters.normalize">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.filters.</span></span><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/filters.html#normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.filters.normalize" title="Link to this definition">¶</a></dt>
+<dd><p>Zero mean and unit norm per filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filters</strong> (<em>Tensor</em>) – (K, s, s) filters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filters</strong> – (K, s, s) float32.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="potential-bases">
+<h2>Potential Bases<a class="headerlink" href="#potential-bases" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="explicit_priors.Hat">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">Hat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">28</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.002</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/basis.html#Hat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.Hat" title="Link to this definition">¶</a></dt>
+<dd><p>Piecewise-linear <span class="math notranslate nohighlight">\(\psi\)</span>: hat functions on knots
+<span class="math notranslate nohighlight">\(0 = t_0 &lt; t_1 &lt; \dots &lt; t_n = 1\)</span>, geometric in <span class="math notranslate nohighlight">\((\epsilon, 1]\)</span>, continued beyond
+<span class="math notranslate nohighlight">\(|u| = 1\)</span> by a linear tail.</p>
+<p>Coefficients <span class="math notranslate nohighlight">\([v_1, \dots, v_n, w]\)</span> are the values of <span class="math notranslate nohighlight">\(\psi\)</span> at the knots and the
+slope of the tail.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Number of knots.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – First knot, relative to the scale.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="explicit_priors.Gauss">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">Gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0015</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/basis.html#Gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.Gauss" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth <span class="math notranslate nohighlight">\(\psi\)</span>: odd Gaussian bumps
+<span class="math notranslate nohighlight">\(e^{-(u - \mu_a)^2 / 2 h_a^2} - e^{-(u + \mu_a)^2 / 2 h_a^2}\)</span> on geometric centres
+<span class="math notranslate nohighlight">\(\mu_a \in [\epsilon, 1]\)</span>, plus a linear term <span class="math notranslate nohighlight">\(u\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Number of bumps.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – First centre, relative to the scale.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="normal-equations">
+<h2>Normal Equations<a class="headerlink" href="#normal-equations" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="explicit_priors.normal_equations">
+<span class="sig-prename descclassname"><span class="pre">explicit_priors.</span></span><span class="sig-name descname"><span class="pre">normal_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/explicit_priors/fit.html#normal_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#explicit_priors.normal_equations" title="Link to this definition">¶</a></dt>
+<dd><p>A, d of the least-squares problem, averaged over pixels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prior</strong> (<a class="reference internal" href="#explicit_priors.FoE" title="explicit_priors.FoE"><em>FoE</em></a>) – Filters, basis and scales.</p></li>
+<li><p><strong>pairs</strong> (<em>iterable</em>) – (points (B, H, W), targets (B, H, W) or None) batches. Targets t give
+<span class="math notranslate nohighlight">\(\min E\|G(p) c - t\|^2\)</span> on the pixels that see whole cliques; None gives score
+matching at the points.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pretrained-priors">Pretrained Priors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.pretrained"><code class="docutils literal notranslate"><span class="pre">pretrained()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.available"><code class="docutils literal notranslate"><span class="pre">available()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fitting">Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.fit"><code class="docutils literal notranslate"><span class="pre">fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.learn_filters"><code class="docutils literal notranslate"><span class="pre">learn_filters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model">Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.FoE"><code class="docutils literal notranslate"><span class="pre">FoE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.responses"><code class="docutils literal notranslate"><span class="pre">FoE.responses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.psi"><code class="docutils literal notranslate"><span class="pre">FoE.psi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.phi"><code class="docutils literal notranslate"><span class="pre">FoE.phi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.energy"><code class="docutils literal notranslate"><span class="pre">FoE.energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.grad"><code class="docutils literal notranslate"><span class="pre">FoE.grad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.energy_grad"><code class="docutils literal notranslate"><span class="pre">FoE.energy_grad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.potentials"><code class="docutils literal notranslate"><span class="pre">FoE.potentials()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.save"><code class="docutils literal notranslate"><span class="pre">FoE.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explicit_priors.FoE.load"><code class="docutils literal notranslate"><span class="pre">FoE.load()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#denoising-and-inverse-problems">Denoising and Inverse Problems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.denoise"><code class="docutils literal notranslate"><span class="pre">denoise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.one_step"><code class="docutils literal notranslate"><span class="pre">one_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.map_estimate"><code class="docutils literal notranslate"><span class="pre">map_estimate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.fista"><code class="docutils literal notranslate"><span class="pre">fista()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#filter-banks">Filter Banks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.dct"><code class="docutils literal notranslate"><span class="pre">dct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.gabor"><code class="docutils literal notranslate"><span class="pre">gabor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.gaussian_derivatives"><code class="docutils literal notranslate"><span class="pre">gaussian_derivatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.laplacian_of_gaussian"><code class="docutils literal notranslate"><span class="pre">laplacian_of_gaussian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.pca"><code class="docutils literal notranslate"><span class="pre">pca()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.ica"><code class="docutils literal notranslate"><span class="pre">ica()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.symmetrize"><code class="docutils literal notranslate"><span class="pre">symmetrize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.stack"><code class="docutils literal notranslate"><span class="pre">stack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.dilate"><code class="docutils literal notranslate"><span class="pre">dilate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.filters.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#potential-bases">Potential Bases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.Hat"><code class="docutils literal notranslate"><span class="pre">Hat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.Gauss"><code class="docutils literal notranslate"><span class="pre">Gauss</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#normal-equations">Normal Equations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#explicit_priors.normal_equations"><code class="docutils literal notranslate"><span class="pre">normal_equations()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">Explicit Priors</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="references.html"
+                          title="next chapter">References</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="references.html" title="References"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Explicit Priors"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Explicit Priors 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Reference</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Youssef Haouchat.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Explicit Priors &#8212; Explicit Priors 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
+    
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>window.MathJax = {"tex": {"macros": {"bbx": "{\\bf{x}}", "bby": "{\\bf{y}}", "bbm": "{\\bf{m}}", "bbf": "{\\bf{f}}", "bbc": "{\\bf{c}}", "bbd": "{\\bf{d}}", "bbA": "{\\bf{A}}", "bbG": "{\\bf{G}}", "bbW": "{\\bf{W}}", "bE": "{\\mathbb{E}}", "bR": "{\\mathbb{R}}", "argmin": "\\operatorname*{arg\\,min}", "norm": ["\\left\\| #1 \\right\\|", 1]}}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Explicit Priors 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Explicit Priors</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="explicit-priors">
+<h1>Explicit Priors<a class="headerlink" href="#explicit-priors" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p><a class="reference external" href="https://github.com/HaouchatY/explicit-priors"><img alt="GitHub repository" src="https://img.shields.io/badge/GitHub-Repo-black?logo=github" /></a> <a class="reference external" href="https://HaouchatY.github.io/explicit-priors/"><img alt="Documentation" src="https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=github" /></a></p>
+<p>Explicit Priors fits fields-of-experts image priors in closed form: one linear solve, no training loop.</p>
+<a class="reference internal image-reference" href="_images/potentials.png"><img alt="3x3 DCT filters and their MAP potentials" src="_images/potentials.png" style="width: 100%;" />
+</a>
+<section id="method">
+<h2>Method<a class="headerlink" href="#method" title="Link to this heading">¶</a></h2>
+<p>A fields of experts <span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id2" title="Stefan Roth and Michael J. Black. Fields of experts. International Journal of Computer Vision, 82(2):205–229, 2009.">6</a>]</span> scores an image <span class="math notranslate nohighlight">\(\bbx\)</span> through the responses of filters
+<span class="math notranslate nohighlight">\(\bbf_{k}\)</span>,</p>
+<div class="math notranslate nohighlight" id="equation-foe">
+<span class="eqno">(1)<a class="headerlink" href="#equation-foe" title="Link to this equation">¶</a></span>\[\Phi(\bbx) = \sum_{k=1}^{K} \sum_{i} \phi_{k}\big( (\bbf_{k} \star \bbx)_{i} \big),
+\qquad
+\phi_{k}' = \sum_{a} c_{ka} \, b_{a},\]</div>
+<p>where the potentials <span class="math notranslate nohighlight">\(\phi_{k}\)</span> are expanded on a fixed basis <span class="math notranslate nohighlight">\(b_{a}\)</span>.
+The gradient <span class="math notranslate nohighlight">\(\nabla \Phi(\bbx) = \bbG(\bbx) \, \bbc\)</span> is linear in the coefficients, so fitting
+<span class="math notranslate nohighlight">\(\Phi\)</span> to images is a least-squares problem in <span class="math notranslate nohighlight">\(\bbc\)</span>, solved by its normal equations</p>
+<div class="math notranslate nohighlight">
+\[\bbA \bbc = \bbd, \qquad \bbA = \bE\big[ \bbG^{\top} \bbG \big], \qquad \bbd = \bE\big[ \bbG^{\top} \mathbf{t} \big].\]</div>
+<p>The points at which <span class="math notranslate nohighlight">\(\bbG\)</span> is evaluated and the target <span class="math notranslate nohighlight">\(\mathbf{t}\)</span> set the objective, with noisy images
+<span class="math notranslate nohighlight">\(\bby = \bbx + \sigma \mathbf{n}\)</span>:</p>
+<ul class="simple">
+<li><p><em>one-step denoiser</em> <span class="math notranslate nohighlight">\(\bby - \sigma^{2} \nabla \Phi(\bby)\)</span> with the lowest error: points <span class="math notranslate nohighlight">\(\bby\)</span>, target
+<span class="math notranslate nohighlight">\((\bby - \bbx) / \sigma^{2}\)</span> (denoising score matching <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id4" title="Pascal Vincent. A connection between score matching and denoising autoencoders. Neural Computation, 23(7):1661–1674, 2011.">7</a>]</span>);</p></li>
+<li><p><em>MAP denoiser</em> <span class="math notranslate nohighlight">\(\argmin_{\bbx} \tfrac12 \norm{\bbx - \bby}^{2} + \sigma^{2} \Phi(\bbx)\)</span> that returns the MMSE
+estimate <span class="math notranslate nohighlight">\(\bbm\)</span> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id5" title="Rémi Gribonval. Should penalized least squares regression be interpreted as maximum a posteriori estimation? IEEE Transactions on Signal Processing, 59(5):2405–2410, 2011.">4</a>]</span>: points <span class="math notranslate nohighlight">\(\bbm\)</span>, target <span class="math notranslate nohighlight">\((\bby - \bbm) / \sigma^{2}\)</span>.
+Gauss-Newton steps then fit the MAP output itself;</p></li>
+<li><p><em>prior of clean images</em>, by score matching <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id3" title="Aapo Hyvärinen. Estimation of non-normalized statistical models by score matching. Journal of Machine Learning Research, 6:695–709, 2005.">5</a>]</span>.</p></li>
+</ul>
+<p>The filters can be analytic, computed from patches in closed form, or learned with the potentials by variable
+projection <span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id6" title="Gene H. Golub and Victor Pereyra. The differentiation of pseudo-inverses and nonlinear least squares problems whose variables separate. SIAM Journal on Numerical Analysis, 10(2):413–432, 1973.">3</a>]</span>: the potentials are re-solved at every step of the filter descent.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">explicit_priors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ep</span>
+
+<span class="n">prior</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">pretrained</span><span class="p">(</span><span class="s2">"map_0.1"</span><span class="p">)</span>  <span class="c1"># or fit your own:</span>
+<span class="n">prior</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ep</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">dct</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span> <span class="n">images</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s2">"map"</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">denoise</span><span class="p">(</span><span class="n">prior</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># user install</span>
+pip<span class="w"> </span>install<span class="w"> </span>explicit_priors@git+https://github.com/HaouchatY/explicit-priors.git
+
+<span class="c1"># developer install</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/HaouchatY/explicit-priors.git
+<span class="nb">cd</span><span class="w"> </span>explicit-priors/
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,examples]"</span>
+pre-commit<span class="w"> </span>install
+
+<span class="c1"># run test suite</span>
+pytest<span class="w"> </span>src/explicit_priors_tests
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="#">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="api.html"
+                          title="next chapter">API Reference</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Explicit Priors 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Explicit Priors</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Youssef Haouchat.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
